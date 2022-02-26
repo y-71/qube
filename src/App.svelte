@@ -3,8 +3,9 @@
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<h1>qube</h1>
+	<p>3D, faster☄️</p>
+	<input type="file">
 </main>
 
 <style>
@@ -15,9 +16,15 @@
 		margin: 0 auto;
 	}
 
+	input{
+		width:40vw;
+		cursor:pointer;
+	}
+	input div{
+		visibility: hidden;
+	}
 	h1 {
 		color: #ff3e00;
-		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 100;
 	}
