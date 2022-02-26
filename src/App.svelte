@@ -3,7 +3,7 @@
 </script>
 
 <main>
-	<h1>qube</h1>
+	<h1>qube🧊</h1>
 	<p>3D, faster☄️</p>
 	<input type="file">
 </main>
