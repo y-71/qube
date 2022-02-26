@@ -1,14 +1,63 @@
 const init = () =>{
+	if (ready) {
+		throw new Error("init must be called once");
+	}
+
     WebAssembly.instantiateStreaming(
         fetch('library.wasm'),
         { wasi_snapshot_preview1: wasi }
         ).then(
-        (results)=>{
-
-            console.log(results);
+        (result)=>{
+			ready = result.instance;
         }
     );
 };
+
+/**
+ * Pack the requested glTF data using the requested command line and access wasmInterface.
+ *
+ * @param args An array of strings with the input arguments; the paths for input and output files are interpreted by the wasmInterface
+ * @param iface An wasmInterface to the system that will be used to service file requests and other system calls
+ * @return Promise that indicates completion of the operation
+ *
+ * iface should contain the following methods:
+ * read(path): Given a path, return a Uint8Array with the contents of that path
+ * write(path, data): Write the specified Uint8Array to the provided path
+ *
+ * When texture compression is requested using external compressor such as toktx, iface must provide two additional methods:
+ * execute(command): Run the requested command and return the return code
+ * unlink(path): Remove the requested file (will be called with paths to temp files after texture compression finishes)
+ */
+ function pack(args, iface) {
+	if (!ready) {
+		throw new Error("init must be called before pack");
+	}
+
+	var argv = args.slice();
+	argv.unshift("gltfpack");
+
+	return ready.then(function () {
+		var buf = uploadArgv(argv);
+
+		output.position = 0;
+		output.size = 0;
+
+		wasmInterface = iface;
+		var result = instance.exports.pack(argv.length, buf);
+		wasmInterface = undefined;
+
+		instance.exports.free(buf);
+
+		var log = getString(output.data.buffer, 0, output.size);
+
+		if (result != 0) {
+			throw new Error(log);
+		} else {
+			return log;
+		}
+	});
+}
+
 
 // Library implementation (here be dragons)
 var WASI_EBADF = 8;
@@ -66,7 +115,7 @@ var wasi = {
 
 		var heap = getHeap();
 
-		var file = {};
+		var file = {} as any;
 		file.name = fds[parent_fd].path + getString(heap.buffer, path, path_len);
 		file.position = 0;
 
@@ -324,5 +373,6 @@ function uploadArgv(argv) {
 	return buf;
 }
 
-
 init();
+
+export {init, pack};

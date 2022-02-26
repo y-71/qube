@@ -1,4 +1,4 @@
-import * as qube from './library';
+import * as qube from './qube';
 import App from './App.svelte';
 const app = new App({
 	target: document.body,
