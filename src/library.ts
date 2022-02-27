@@ -1,16 +1,8 @@
-const init = () =>{
-	if (ready) {
-		throw new Error("init must be called once");
-	}
-
-    WebAssembly.instantiateStreaming(
+const init = ():Promise<WebAssembly.WebAssemblyInstantiatedSource> =>{
+    return WebAssembly.instantiateStreaming(
         fetch('library.wasm'),
         { wasi_snapshot_preview1: wasi }
-        ).then(
-        (result)=>{
-			ready = result.instance;
-        }
-    );
+        )
 };
 
 /**
@@ -28,34 +20,32 @@ const init = () =>{
  * execute(command): Run the requested command and return the return code
  * unlink(path): Remove the requested file (will be called with paths to temp files after texture compression finishes)
  */
- function pack(args, iface) {
-	if (!ready) {
-		throw new Error("init must be called before pack");
-	}
+ async function pack(args, iface) {
 
 	var argv = args.slice();
 	argv.unshift("gltfpack");
 
-	return ready.then(function () {
-		var buf = uploadArgv(argv);
+	wasmInstantiatedSource = wasmInstantiatedSource || await init ();
 
-		output.position = 0;
-		output.size = 0;
+	var buf = uploadArgv(argv);
 
-		wasmInterface = iface;
-		var result = instance.exports.pack(argv.length, buf);
-		wasmInterface = undefined;
+	output.position = 0;
+	output.size = 0;
 
-		instance.exports.free(buf);
+	wasmInterface = iface;
+	var result = wasmInstantiatedSource.exports.pack(argv.length, buf);
+	wasmInterface = undefined;
 
-		var log = getString(output.data.buffer, 0, output.size);
+	wasmInstantiatedSource.exports.free(buf);
 
-		if (result != 0) {
-			throw new Error(log);
-		} else {
-			return log;
-		}
-	});
+	var log = getString(output.data.buffer, 0, output.size);
+
+	if (result != 0) {
+		throw new Error(log);
+	} else {
+		return log;
+	}
+
 }
 
 
@@ -66,7 +56,7 @@ var WASI_EIO = 29;
 var WASI_ENOSYS = 52;
 
 var ready;
-var instance;
+var wasmInstantiatedSource;
 var wasmInterface;
 
 var output = { data: new Uint8Array(), position: 0, size: 0 };
@@ -326,7 +316,7 @@ function nextFd() {
 }
 
 function getHeap() {
-	return new DataView(instance.exports.memory.buffer);
+	return new DataView(wasmInstantiatedSource.exports.memory.buffer);
 }
 
 function getString(buffer, offset, length) {
@@ -355,7 +345,7 @@ function uploadArgv(argv) {
 		buf_size += stringBuffer(argv[i]).length + 1;
 	}
 
-	var buf = instance.exports.malloc(buf_size);
+	var buf = wasmInstantiatedSource.exports.malloc(buf_size);
 	var argp = buf + argv.length * 4;
 
 	var heap = getHeap();
@@ -372,7 +362,5 @@ function uploadArgv(argv) {
 
 	return buf;
 }
-
-init();
 
 export {init, pack};

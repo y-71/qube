@@ -1,11 +1,22 @@
 <script lang="ts">
-	export let name: string;
+	export let files:File[];
 </script>
 
 <main>
 	<h1>qube🧊</h1>
 	<p>3D, faster☄️</p>
-	<input type="file">
+	<!--default html file upload button-->
+	<input type="file" id="upload-btn" bind:files hidden/>
+
+	<!--our custom file upload button-->
+	<div>
+		<label for="upload-btn" >Choose File</label>
+	</div>
+	{#if files && files[0]}
+		<p>
+			{files[0].name}
+		</p>
+	{/if}
 </main>
 
 <style>
@@ -15,13 +26,19 @@
 		max-width: 240px;
 		margin: 0 auto;
 	}
-
-	input{
-		width:40vw;
-		cursor:pointer;
+	div{
+		display:flex;
+		justify-content: center;
 	}
-	input div{
-		visibility: hidden;
+	label {
+		background-color: indigo;
+		color: white;
+		padding: 0.5rem;
+		font-family: sans-serif;
+		border-radius: 0.3rem;
+		cursor: pointer;
+		margin-top: 1rem;
+		max-width: 300px;
 	}
 	h1 {
 		color: #ff3e00;

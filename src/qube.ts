@@ -1,5 +1,6 @@
 // This file is part of gltfpack and is distributed under the terms of MIT License.
 import * as gltfpack from './library';
+import {} from './App.svelte';
 
 console.log('pack', gltfpack);
 
@@ -19,6 +20,7 @@ var wasmInterface = {
 
 const args = ['', ''];
 
+/**
 gltfpack.pack(args, wasmInterface)
     .then(function(log){
         console.log("done compressing \n",log);
@@ -26,3 +28,4 @@ gltfpack.pack(args, wasmInterface)
     .catch(function(err){
         console.error("found error\n ",err.message);
     });
+ */
