@@ -1,11 +1,11 @@
 <script lang="ts">
 	let files:File[];
 	import {pack} from './qube';
-	const optimize=()=>{
-		if(!files && ! files[0]){
-			throw Error("Upload Error: unable to locate glTF");
+	const optimize= async ()=>{
+		if(!files && files.length==0){
+			throw new Error("Upload Error: unable to locate glTF");
 		}
-		pack(files[0].webkitRelativePath);
+		files.forEach(async(file)=>{await pack(file)});
 	}
 </script>
 
@@ -18,12 +18,12 @@
 	<!--our custom file upload button-->
 	<div>
 		<label for="upload-btn" >Choose File</label>
+		{#if files && files[0]}
+			<button on:click|once={()=>{optimize()}}>
+				optimize <i>{files[0].name}</i>
+			</button>
+		{/if}
 	</div>
-	{#if files && files[0]}
-		<button on:click|once={()=>{optimize()}}>
-			optimize <p><i>{files[0].name}</i></p>
-		</button>
-	{/if}
 </main>
 
 <style>
@@ -51,11 +51,8 @@
 		background-color: blue;
 		border-radius: 5px;
 		color: white;
-		padding: 0.5rem;
-		margin: 0.5rem;
-	}
-	p{
-		color: magenta
+		margin:0;
+		cursor: pointer
 	}
 	h1 {
 		color: mediumseagreen;

@@ -20,13 +20,13 @@ const init = ():Promise<WebAssembly.WebAssemblyInstantiatedSource> =>{
  * execute(command): Run the requested command and return the return code
  * unlink(path): Remove the requested file (will be called with paths to temp files after texture compression finishes)
  */
- async function pack(args, iface) {
+ export async function pack(args, iface) {
 
 	var argv = args.slice();
 	argv.unshift("gltfpack");
 
 	wasmInstance = wasmInstance || (await init ()).instance;
-	console.log('wasmInstance', wasmInstance);
+
 	var buf = uploadArgv(argv);
 
 	output.position = 0;
@@ -361,4 +361,3 @@ function uploadArgv(argv) {
 	return buf;
 }
 
-export {init, pack};

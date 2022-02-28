@@ -2,9 +2,8 @@
 import * as gltfpack from './library';
 
 var wasmInterface = {
-    read: function (path){
-        const fileReader = new FileReader();
-        return fileReader.readAsArrayBuffer(path);
+    read: async function (file:File){
+        return await file.arrayBuffer();
     },
     write: function(path, data){
         const file = new Blob([data], {type: "application/json"});
@@ -16,8 +15,8 @@ var wasmInterface = {
 };
 
 
-export function pack(glTFInput:string){
-    gltfpack.pack([glTFInput,""], wasmInterface)
+export async function pack(input:File){
+    await gltfpack.pack(["-i",input.name,"-o", "test.gltf"], wasmInterface)
         .then(function(log){
             console.log("done compressing \n",log);
         })
