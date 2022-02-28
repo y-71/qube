@@ -1,5 +1,12 @@
 <script lang="ts">
 	export let files:File[];
+	import {pack} from './qube';
+	const optimize=()=>{
+		if(!files && ! files[0]){
+			throw Error("Upload Error: unable to locate glTF");
+		}
+		pack(files[0].webkitRelativePath);
+	}
 </script>
 
 <main>
@@ -13,9 +20,9 @@
 		<label for="upload-btn" >Choose File</label>
 	</div>
 	{#if files && files[0]}
-		<p>
-			{files[0].name}
-		</p>
+		<button on:click|once={()=>{optimize()}}>
+			optimize <p><i>{files[0].name}</i></p>
+		</button>
 	{/if}
 </main>
 
@@ -40,8 +47,18 @@
 		margin-top: 1rem;
 		max-width: 300px;
 	}
+	button{
+		background-color: blue;
+		border-radius: 5px;
+		color: white;
+		padding: 0.5rem;
+		margin: 0.5rem;
+	}
+	p{
+		color: magenta
+	}
 	h1 {
-		color: #ff3e00;
+		color: mediumseagreen;
 		font-size: 4em;
 		font-weight: 100;
 	}
