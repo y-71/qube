@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let files:File[];
+	let files:File[];
 	import {pack} from './qube';
 	const optimize=()=>{
 		if(!files && ! files[0]){

@@ -25,18 +25,18 @@ const init = ():Promise<WebAssembly.WebAssemblyInstantiatedSource> =>{
 	var argv = args.slice();
 	argv.unshift("gltfpack");
 
-	wasmInstantiatedSource = wasmInstantiatedSource || await init ();
-
+	wasmInstance = wasmInstance || (await init ()).instance;
+	console.log('wasmInstance', wasmInstance);
 	var buf = uploadArgv(argv);
 
 	output.position = 0;
 	output.size = 0;
 
 	wasmInterface = iface;
-	var result = wasmInstantiatedSource.exports.pack(argv.length, buf);
+	var result = wasmInstance.exports.pack(argv.length, buf);
 	wasmInterface = undefined;
 
-	wasmInstantiatedSource.exports.free(buf);
+	wasmInstance.exports.free(buf);
 
 	var log = getString(output.data.buffer, 0, output.size);
 
@@ -55,8 +55,7 @@ var WASI_EINVAL = 28;
 var WASI_EIO = 29;
 var WASI_ENOSYS = 52;
 
-var ready;
-var wasmInstantiatedSource;
+var wasmInstance;
 var wasmInterface;
 
 var output = { data: new Uint8Array(), position: 0, size: 0 };
@@ -316,7 +315,7 @@ function nextFd() {
 }
 
 function getHeap() {
-	return new DataView(wasmInstantiatedSource.exports.memory.buffer);
+	return new DataView(wasmInstance.exports.memory.buffer);
 }
 
 function getString(buffer, offset, length) {
@@ -344,8 +343,7 @@ function uploadArgv(argv) {
 	for (var i = 0; i < argv.length; ++i) {
 		buf_size += stringBuffer(argv[i]).length + 1;
 	}
-
-	var buf = wasmInstantiatedSource.exports.malloc(buf_size);
+	var buf = wasmInstance.exports.malloc(buf_size);
 	var argp = buf + argv.length * 4;
 
 	var heap = getHeap();
